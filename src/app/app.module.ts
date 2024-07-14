@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import {MatBadgeModule} from '@angular/material/badge';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -28,6 +30,7 @@ import { AppComponent } from './app.component';
 import { TasksDashboardComponent } from './tasks-dashboard/tasks-dashboard.component';
 import { TaskDialogComponent } from './tasks-dashboard/task-dialog.component';
 import { LoginComponent } from './auth/login.component';
+import { LoaderComponent } from './loader/loader.component';
 
 @NgModule({
   declarations: [
@@ -35,6 +38,7 @@ import { LoginComponent } from './auth/login.component';
     TasksDashboardComponent,
     TaskDialogComponent,
     LoginComponent,
+    LoaderComponent,
   ],
   imports: [
     BrowserModule,
@@ -42,6 +46,8 @@ import { LoginComponent } from './auth/login.component';
     FormsModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
+    DragDropModule,
+    MatBadgeModule,
     MatCardModule,
     MatChipsModule,
     MatGridListModule,

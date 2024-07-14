@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable } from 'rxjs';
-import { Task, TaskModel, TaskStatus } from '@firetasks/models';
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { Observable, Subject, takeUntil } from 'rxjs';
+import { Task, TaskActivity, TaskModel, TaskStatus } from '@firetasks/models'
 
 import { TaskService, TaskList } from '../services/task.service';
 import { TaskDialogComponent } from './task-dialog.component';
@@ -10,26 +11,70 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 @Component({
   selector: 'app-tasks-dashboard',
   templateUrl: './tasks-dashboard.component.html',
-  styleUrls: ['./tasks-dashboard.component.scss']
+  styleUrls: ['./tasks-dashboard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TasksDashboardComponent implements OnInit {
+export class TasksDashboardComponent implements OnInit, OnDestroy {
   taskLists$?: Observable<TaskList[]>;
+  taskLists?: TaskList[];
   user?: { uid: string, displayName?: string };
+  isLoading = false;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private dialog: MatDialog,
     private auth: AngularFireAuth,
     private taskService: TaskService,
+    private cdRef: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.auth.currentUser.then(user => this.user = user as any);
-    this.taskLists$ = this.taskService.taskLists$;
+    this.taskService.taskLists$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(taskLists => {
+        this.taskLists = taskLists;
+        this.cdRef.markForCheck();
+      });
+  }
+
+  onDrop(event: CdkDragDrop<Task[]>) {
+    this.isLoading = true;
+    if (event.previousContainer.id === event.container.id) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      this.cdRef.markForCheck();
+      this.isLoading = false;
+    } else {
+      const task = event.previousContainer.data[event.previousIndex];
+      task.status = event.container.id as TaskStatus;
+      this.taskService.update(task)
+        .then(() => {
+          transferArrayItem(
+            event.previousContainer.data,
+            event.container.data,
+            event.previousIndex,
+            event.currentIndex
+          );
+        })
+        .finally(() => {
+          this.isLoading = false;
+          this.cdRef.markForCheck();
+        })
+        .catch((err) => console.error(err));
+    }
+  }
+
+  checkActivities(activities?: TaskActivity[]): number | null {
+    if (!activities) {
+      return null;
+    }
+    const toBeDone = activities.filter(activity => activity.isCompleted === false)
+    return toBeDone.length;
   }
 
   async addNewTask(status: string) {
-    this.dialog.open(TaskDialogComponent, {
-      width: '450px',
+    const dialogRef = this.dialog.open(TaskDialogComponent, {
+      width: '550px',
       height: '600px',
       data: {
         task: new TaskModel({
@@ -42,12 +87,16 @@ export class TasksDashboardComponent implements OnInit {
         userId: this.user?.uid,
       },
     });
+    // dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
+    //   this.cdRef.markForCheck();
+    //   console.log('The dialog was closed', result);
+    // });
   }
 
   async showTaskDetail(task: Task) {
     // console.log('showTaskDetail', task);
     const dialogRef = this.dialog.open(TaskDialogComponent, {
-      width: '450px',
+      width: '550px',
       height: '600px',
       data: {
         task,
@@ -55,8 +104,14 @@ export class TasksDashboardComponent implements OnInit {
       },
     });
 
-    // dialogRef.afterClosed().subscribe(result => {
+    // dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
+    //   this.cdRef.markForCheck();
     //   console.log('The dialog was closed', result);
     // });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
