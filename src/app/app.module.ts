@@ -3,7 +3,8 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import {MatBadgeModule} from '@angular/material/badge';
+import { MatBadgeModule } from '@angular/material/badge';
+import {MatSelectModule} from '@angular/material/select';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,6 +14,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatChipsModule } from '@angular/material/chips';
 import { EditableModule } from '@ngneat/edit-in-place';
@@ -31,6 +33,8 @@ import { TasksDashboardComponent } from './tasks-dashboard/tasks-dashboard.compo
 import { TaskDialogComponent } from './tasks-dashboard/task-dialog.component';
 import { LoginComponent } from './auth/login.component';
 import { LoaderComponent } from './loader/loader.component';
+import { ActivitiesComponent } from './tasks-dashboard/activities/activities.component';
+import { UserNamePipe } from './pipes/user-name.pipe';
 
 @NgModule({
   declarations: [
@@ -39,6 +43,8 @@ import { LoaderComponent } from './loader/loader.component';
     TaskDialogComponent,
     LoginComponent,
     LoaderComponent,
+    ActivitiesComponent,
+    UserNamePipe,
   ],
   imports: [
     BrowserModule,
@@ -47,7 +53,9 @@ import { LoaderComponent } from './loader/loader.component';
     ReactiveFormsModule,
     BrowserAnimationsModule,
     DragDropModule,
+    MatTooltipModule,
     MatBadgeModule,
+    MatSelectModule,
     MatCardModule,
     MatChipsModule,
     MatGridListModule,

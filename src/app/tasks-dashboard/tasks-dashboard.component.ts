@@ -38,7 +38,11 @@ export class TasksDashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  onDrop(event: CdkDragDrop<Task[]>) {
+  trackByIndex(index: number, task: Task): number {
+    return index;
+  }
+
+  onDrop(event: CdkDragDrop<Task[]>): void {
     this.isLoading = true;
     if (event.previousContainer.id === event.container.id) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);

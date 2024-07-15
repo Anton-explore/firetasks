@@ -21,7 +21,7 @@ export interface Task {
 
 export interface TaskActivity {
   title: string;
-  assignee?: UserRef;
+  assignee?: string;
   isCompleted: boolean;
 }
 

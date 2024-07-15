@@ -20,6 +20,12 @@
       <span>created: {{ task.createdAt | date:'medium' }}</span>
       <span>last updated: {{ task.updatedAt | date:'medium' }}</span>
     </div>
+    <app-activities
+      [taskId]="task.id"
+      [activities]="task.activities"
+      [isOwner]="isOwner"
+      (activitiesChanged)="updateActivities($event)"
+    ></app-activities>
   </mat-dialog-content>
   <div class="close">
     <a mat-icon-button mat-dialog-close><mat-icon>close</mat-icon></a>
