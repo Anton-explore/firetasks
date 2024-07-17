@@ -4,6 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatBadgeModule } from '@angular/material/badge';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatSelectModule} from '@angular/material/select';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
@@ -33,8 +34,9 @@ import { TasksDashboardComponent } from './tasks-dashboard/tasks-dashboard.compo
 import { TaskDialogComponent } from './tasks-dashboard/task-dialog.component';
 import { LoginComponent } from './auth/login.component';
 import { LoaderComponent } from './loader/loader.component';
-import { ActivitiesComponent } from './tasks-dashboard/activities/activities.component';
+import { ActivitiesComponent } from './activities/activities.component';
 import { UserNamePipe } from './pipes/user-name.pipe';
+import { UserAvatarPipe } from './pipes/user-img.pipe';
 
 @NgModule({
   declarations: [
@@ -45,6 +47,7 @@ import { UserNamePipe } from './pipes/user-name.pipe';
     LoaderComponent,
     ActivitiesComponent,
     UserNamePipe,
+    UserAvatarPipe,
   ],
   imports: [
     BrowserModule,
@@ -53,6 +56,7 @@ import { UserNamePipe } from './pipes/user-name.pipe';
     ReactiveFormsModule,
     BrowserAnimationsModule,
     DragDropModule,
+    MatCheckboxModule,
     MatTooltipModule,
     MatBadgeModule,
     MatSelectModule,

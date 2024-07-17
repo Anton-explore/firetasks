@@ -8,17 +8,17 @@ service cloud.firestore {
       return request.auth.uid;
     }
     function ownsItem() {
-      return userId() == existingData().owner.id;
+      return userId() == resource.data.owner.id;
     }
 
     function accessesField(field) {
-      return incomingData().diff(existingData()).affectedKeys().hasOnly([field]);
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([field]);
     }
 
 
     match /tasks/{task} {
       allow read: if isSignedIn();
-      allow create: if isSignedIn() && userId() == incomingData().owner.id;
+      allow create: if isSignedIn() && userId() == request.resource.data.owner.id;
       allow update: if isSignedIn() && ownsItem();
       allow delete: if isSignedIn() && ownsItem();
 

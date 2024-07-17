@@ -9,6 +9,7 @@
 
   <span *ngIf="user">
     Hello {{ user?.displayName }}!
+    <button class="user-activities" mat-flat-button (click)="toggleToActivities()">{{isOnActivitiesPage ? 'Go to main' : 'Check activities'}}</button>
     <button mat-flat-button (click)="logout()">Logout</button>
   </span>
 </mat-toolbar>

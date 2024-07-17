@@ -8,37 +8,30 @@ import { TaskService, TaskList } from '../services/task.service';
 import { TaskDialogComponent } from './task-dialog.component';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 
+export interface IUser { uid: string, displayName?: string };
 @Component({
   selector: 'app-tasks-dashboard',
   templateUrl: './tasks-dashboard.component.html',
   styleUrls: ['./tasks-dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TasksDashboardComponent implements OnInit, OnDestroy {
+export class TasksDashboardComponent implements OnInit {
   taskLists$?: Observable<TaskList[]>;
-  taskLists?: TaskList[];
-  user?: { uid: string, displayName?: string };
+  user?: IUser;
   isLoading = false;
-  private destroy$ = new Subject<void>();
 
   constructor(
     private dialog: MatDialog,
     private auth: AngularFireAuth,
     private taskService: TaskService,
-    private cdRef: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.auth.currentUser.then(user => this.user = user as any);
-    this.taskService.taskLists$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(taskLists => {
-        this.taskLists = taskLists;
-        this.cdRef.markForCheck();
-      });
+    this.taskLists$ = this.taskService.taskLists$;
   }
 
-  trackByIndex(index: number, task: Task): number {
+  trackByIndex(index: number, list: TaskList): number {
     return index;
   }
 
@@ -46,7 +39,6 @@ export class TasksDashboardComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     if (event.previousContainer.id === event.container.id) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-      this.cdRef.markForCheck();
       this.isLoading = false;
     } else {
       const task = event.previousContainer.data[event.previousIndex];
@@ -62,7 +54,6 @@ export class TasksDashboardComponent implements OnInit, OnDestroy {
         })
         .finally(() => {
           this.isLoading = false;
-          this.cdRef.markForCheck();
         })
         .catch((err) => console.error(err));
     }
@@ -73,13 +64,15 @@ export class TasksDashboardComponent implements OnInit, OnDestroy {
       return null;
     }
     const toBeDone = activities.filter(activity => activity.isCompleted === false)
-    return toBeDone.length;
+    return toBeDone.length || null;
   }
 
   async addNewTask(status: string) {
-    const dialogRef = this.dialog.open(TaskDialogComponent, {
+    this.dialog.open(TaskDialogComponent, {
       width: '550px',
-      height: '600px',
+      autoFocus: 'first-header',
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '300ms',
       data: {
         task: new TaskModel({
           status: status as TaskStatus,
@@ -91,31 +84,18 @@ export class TasksDashboardComponent implements OnInit, OnDestroy {
         userId: this.user?.uid,
       },
     });
-    // dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
-    //   this.cdRef.markForCheck();
-    //   console.log('The dialog was closed', result);
-    // });
   }
 
   async showTaskDetail(task: Task) {
-    // console.log('showTaskDetail', task);
-    const dialogRef = this.dialog.open(TaskDialogComponent, {
+    this.dialog.open(TaskDialogComponent, {
       width: '550px',
-      height: '600px',
+      autoFocus: 'first-header',
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '300ms',
       data: {
         task,
         userId: this.user?.uid,
       },
     });
-
-    // dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
-    //   this.cdRef.markForCheck();
-    //   console.log('The dialog was closed', result);
-    // });
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

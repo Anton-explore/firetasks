@@ -1,5 +1,5 @@
 <div cdkDropListGroup>
-  <div class="list-container" *ngFor="let list of taskLists">
+  <div class="list-container" *ngFor="let list of taskLists$ | async; trackBy: trackByIndex">
     <div class="list-title" fxLayout="row" fxLayoutAlign="space-between">
       <h2>{{ list.label }}</h2>
       <button mat-mini-fab color="primary" (click)="addNewTask(list.status)">
