@@ -1,7 +1,7 @@
 import { groupBy, mapValues } from 'lodash';
 import { Injectable } from '@angular/core';
-import { Firestore, collectionData, collection, doc, setDoc, deleteDoc, updateDoc } from '@angular/fire/firestore';
-import { Task, TaskActivity, TaskModel, TaskStatus } from '@firetasks/models';
+import { Firestore, collectionData, collection, doc, setDoc, deleteDoc, updateDoc, } from '@angular/fire/firestore';
+import { Task, TaskModel, TaskStatus } from '@firetasks/models';
 import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -40,21 +40,18 @@ export class TaskService {
   save(task: Task): Promise<void> {
     let taskRef = task.id ? doc(this.firestore, `tasks/${task.id}`) : doc(collection(this.firestore, 'tasks'));
     task.id = task.id || taskRef.id;
+    console.log('Save', task);
     return setDoc(taskRef, task.toFirestore());
   }
 
   update(task: Task): Promise<void> {
-    let taskRef = doc(this.firestore, `tasks/${task.id}`);
+    const taskRef = doc(this.firestore, `tasks/${task.id}`);
+    console.log('Update', task);
     return updateDoc(taskRef, { status: task.status as TaskStatus });
   }
 
-  updateActivities(task: Task): Promise<void> {
-    let taskRef = doc(this.firestore, `tasks/${task.id}`);
-    console.log(task.activities);
-    return updateDoc(taskRef, { updatedAt: new Date(), activities: task.activities as TaskActivity[] });
-  }
-
   delete(task: Task): Promise<void> {
+    console.log('Delete: ', task);
     return deleteDoc(doc(this.firestore, `tasks/${task.id}`));
   }
 
