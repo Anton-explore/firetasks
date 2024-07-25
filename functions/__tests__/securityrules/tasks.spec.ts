@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import * as firebase from '@firebase/testing';
 import { app as fbApp } from 'firebase';
 
-import { TaskStatus } from '../../../libs/models';
+import { TaskActivity, TaskStatus } from '../../../libs/models';
 
 // Visualize Evaluation: http://localhost:4103/emulator/v1/projects/test-firestore-security-project:ruleCoverage.html
 const TEST_FIREBASE_PROJECT_ID = 'test-firestore-security-project';
@@ -26,6 +26,12 @@ const testUser1 = {
 };
 const testUser2 = {
   id: 'testUser-2',
+};
+const testActivity: TaskActivity = {
+  activityId: 'test-id',
+  title: 'Test title',
+  assignee: 'test-id',
+  isCompleted: true,
 };
 
 describe('tasks collection', () => {
@@ -92,7 +98,7 @@ describe('tasks collection', () => {
     );
   });
 
-  it('non-owners should NOT be allowed to update or delete tasks (only exception is the status field)', async () => {
+  it('non-owners should NOT be allowed to update or delete tasks (only exception is the status field and activities)', async () => {
     const db = initializeFirestoreTestAppWithUser(testUser2);
 
     await firebase.assertFails(
@@ -101,11 +107,26 @@ describe('tasks collection', () => {
     await firebase.assertSucceeds(
         db.doc('tasks/task-id').update({ status: TaskStatus.DONE }),
     );
+    await firebase.assertSucceeds(
+        db.doc('tasks/task-id').update({ activities: [testActivity] }),
+    );
     await firebase.assertFails(
         db.doc('tasks/task-id').update({ status: TaskStatus.DONE, title: 'i am not allowed' }),
     );
     await firebase.assertFails(
         db.doc('tasks/task-id').delete(),
+    );
+  });
+
+  it('signedin users should be allowed to create tasks with themselves as the owner', async () => {
+    const db = initializeFirestoreTestAppWithUser(testUser1);
+
+    await firebase.assertSucceeds(
+        db.doc('tasks/new-task-id').set({
+          id: 'new-task-id',
+          title: 'new task',
+          owner: { id: testUser1.id },
+        }),
     );
   });
 

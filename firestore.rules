@@ -8,26 +8,24 @@ service cloud.firestore {
       return request.auth.uid;
     }
     function ownsItem() {
-      return userId() == existingData().owner.id;
-    }
-    function accessesField(field) {
-      return incomingData().diff(existingData()).affectedKeys().hasOnly([field]);
+      return userId() == resource.data.owner.id;
     }
 
-    // [READ] Data that exists on the Firestore document
-    function existingData() {
-      return resource.data;
+    function accessesField(field) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([field]);
     }
-    // [WRITE] Data that is sent to a Firestore document
-    function incomingData() {
-      return request.resource.data;
-    }
+
 
     match /tasks/{task} {
       allow read: if isSignedIn();
-      allow create: if isSignedIn() && userId() == incomingData().owner.id;
-      allow update: if isSignedIn();
+      allow create: if isSignedIn() && userId() == request.resource.data.owner.id;
+      allow update: if isSignedIn() && ownsItem();
       allow delete: if isSignedIn() && ownsItem();
+
+      // Allow users to update status
+      allow update: if isSignedIn() && accessesField('status');
+      // Allow users to update activities
+      allow update: if isSignedIn() && accessesField('activities');
     }
 
     match /users/{user} {

@@ -8,11 +8,17 @@ const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['login']);
 const redirectLoggedInToItems = () => redirectLoggedInTo(['']);
 
 import { TasksDashboardComponent } from './tasks-dashboard/tasks-dashboard.component';
+import { ActivitiesComponent } from './activities/activities.component';
 
 const routes: Routes = [
   {
     path: '',
     component: TasksDashboardComponent,
+    ...canActivate(redirectUnauthorizedToLogin),
+  },
+  {
+    path: 'activities',
+    component: ActivitiesComponent,
     ...canActivate(redirectUnauthorizedToLogin),
   },
   {

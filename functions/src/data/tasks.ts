@@ -159,7 +159,8 @@ export const tasks: Task[] = [
 
 // eslint-disable-next-line require-jsdoc
 function initActivity(activities: string[]) {
-  return activities.map((activity) => ({
+  return activities.map((activity, i) => ({
+    activityId: `activity_${i + 1}`,
     title: activity,
     isCompleted: false,
   }) as TaskActivity);

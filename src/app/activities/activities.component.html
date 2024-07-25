@@ -1,0 +1,39 @@
+<div>
+  <h2>Your activities list</h2>
+  <div *ngIf="(tasks$ | async)?.length; else placeholder" fxLayout="row" fxLayoutAlign="center">
+    <div class="task-container" *ngFor="let task of tasks$ | async; trackBy: trackByIndex">
+      <div class="task-title" fxLayout="column" fxLayoutAlign="space-between">
+        <h2>Task: {{ task.title }}</h2>
+        <div class="activity">
+          <p>Activities:</p>
+          <mat-card
+            *ngFor="let activity of task.activities trackBy: trackByIndex"
+            class="activity-card"
+          >
+            <mat-card-header>
+              <mat-card-title>{{ activity.title }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div *ngIf="activity.isCompleted; else inProgress" class="status done">
+                <mat-icon color="primary">check_circle</mat-icon>
+                <span class="white">Completed</span>
+              </div>
+              <ng-template #inProgress>
+                <div class="status in-progress">
+                  <mat-icon class="white">hourglass_empty</mat-icon>
+                  <span class="white">In Progress</span>
+                </div>
+              </ng-template>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <ng-template #placeholder>
+    <p>You don't have any activities</p>
+  </ng-template>
+</div>
+
+

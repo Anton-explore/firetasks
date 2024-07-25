@@ -1,10 +1,11 @@
-<form [formGroup]="taskForm" class="dialog">
+<form [formGroup]="taskForm" class="dialog" (ngSubmit)="onSubmit($event)">
+  <app-loader *ngIf="isLoading"></app-loader>
   <h2 mat-dialog-title>
     <editable *ngIf="isOwner" (save)="save()" (cancel)="cancel()">
       <ng-template viewMode><span [ngClass]="{placeholder: !task.title}">{{ task.title || 'Task title' }}</span></ng-template>
       <ng-template editMode>
-        <mat-form-field fxFlex="100%">
-          <input type="text" matInput placeholder="Task title" editableFocusable editableOnEnter editableOnEscape formControlName="title" />
+        <mat-form-field fxFlex="100%" appearance="outline">
+          <input type="text" matInput placeholder="Task title" editableFocusable editableOnEnter editableOnEscape  formControlName="title" (keydown.enter)="$event.preventDefault()"/>
         </mat-form-field>
       </ng-template>
     </editable>
@@ -12,7 +13,7 @@
   </h2>
   <mat-dialog-content>
     <div fxLayout="row" fxLayoutAlign="space-between center">
-      <span class="status">{{ task.status }}</span>
+      <span class="status" [ngClass]="task.status">{{ task.status }}</span>
       <span class="owner" *ngIf="isOwner">submitted by me</span>
       <span class="owner" *ngIf="!isOwner">submitted by: {{ task.owner.name }}</span>
     </div>
@@ -20,9 +21,67 @@
       <span>created: {{ task.createdAt | date:'medium' }}</span>
       <span>last updated: {{ task.updatedAt | date:'medium' }}</span>
     </div>
+
+    <!-- Activities section -->
+    <div class="activities" *ngIf="task.id">
+      <h3 fxLayoutAlign="center">Activities</h3>
+      <div formArrayName="activities" fxLayout="column" class="activities-list">
+        <mat-card
+          *ngFor="let activity of activitiesForm.controls; let i = index; trackBy: trackByIndex"
+          formGroupName="{{i}}"
+          class="activity-item"
+          fxLayout="column"
+          fxLayoutAlign="center stretch"
+        >
+            <editable *ngIf="isOwner" (save)="saveActivity(i)" (cancel)="cancel()">
+              <ng-template viewMode>
+                <span [ngClass]="{placeholder: !activity.value.title}" class="activity-title">
+                  {{ activity.value.title || 'Activity title' }}
+                </span>
+              </ng-template>
+              <ng-template editMode>
+                <mat-form-field fxFlex="100%" appearance="outline">
+                  <input
+                    type="text"
+                    matInput
+                    placeholder="Task title"
+                    editableFocusable
+                    editableOnEnter
+                    editableOnEscape
+                    (keydown.enter)="$event.preventDefault()"
+                    formControlName="title" />
+                </mat-form-field>
+              </ng-template>
+            </editable>
+            <span *ngIf="!isOwner" class="activity-title">{{ activity.value.title }}</span>
+            <div fxLayout="row" fxLayoutAlign="space-between">
+              <mat-form-field appearance="outline">
+                <mat-label>Assignee: </mat-label>
+                <mat-select placeholder="Assigned" formControlName="assignee" (selectionChange)="saveActivity(i)">
+                  <mat-option *ngFor="let user of users$ | async" [value]="user.id">{{ user.name }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <div *ngIf="task.activities && task.activities[i]?.assignee">
+                <img
+                  [src]="(task.activities[i].assignee | userAvatar:(users$ | async))"
+                  class="activity-user"
+                  alt="{{(task.activities[i].assignee | userName:(users$ | async)) || 'Activity user'}}">
+              </div>
+              <mat-checkbox formControlName="isCompleted" color="primary" (change)="saveActivity(i)">Completed</mat-checkbox>
+              <button mat-icon-button type="button" color="warn" (click)="deleteActivity(i)" *ngIf="isOwner">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+        </mat-card>
+      </div>
+      <div *ngIf="isOwner">
+        <button mat-raised-button type="button" color="primary" class="activity-add" (click)="addActivity()">Add Activity</button>
+      </div>
+    </div>
+
   </mat-dialog-content>
   <div class="close">
-    <a mat-icon-button mat-dialog-close><mat-icon>close</mat-icon></a>
+    <button mat-icon-button mat-dialog-close><mat-icon>close</mat-icon></button>
   </div>
   <div class="delete" *ngIf="isOwner">
     <button mat-fab color="accent" (click)="delete()"><mat-icon>delete</mat-icon></button>

@@ -20,8 +20,9 @@ export interface Task {
 }
 
 export interface TaskActivity {
+  activityId: string,
   title: string;
-  assignee?: UserRef;
+  assignee?: string;
   isCompleted: boolean;
 }
 
